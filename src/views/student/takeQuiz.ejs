@@ -1,0 +1,692 @@
+<div class="quiz-container">
+  <div class="quiz-header">
+    <h2 class="quiz-title"><%= quiz.title %></h2>
+    <p class="quiz-description"><%= quiz.description %></p>
+  </div>
+  
+  <form id="quizForm" action="/student/quiz/<%= quiz._id %>/submit" method="POST">
+    <% quiz.questions.forEach((question, questionIndex) => { %>
+      <div class="question-container" data-question="<%= questionIndex %>">
+        <div class="question-header">
+          <span class="question-number">Câu <%= questionIndex + 1 %></span>
+          <h3 class="question-title"><%= question.text %></h3>
+        </div>
+        
+        <!-- Hiển thị ảnh minh họa nếu có -->
+        <% if (question.image) { %>
+          <div class="question-image">
+            <img src="<%= question.image %>" class="img-fluid" alt="Hình minh họa câu hỏi">
+          </div>
+        <% } %>
+        
+        <!-- Hiển thị các loại câu hỏi khác nhau -->
+        <% if (question.type === 'multiple_choice') { %>
+          <!-- Câu hỏi trắc nghiệm -->
+          <div class="options-container">
+            <% question.options.forEach((option, optionIndex) => { %>
+              <div class="option-item" data-option="<%= optionIndex %>">
+                <input type="radio" name="question_<%= questionIndex %>" id="option<%= questionIndex %>_<%= optionIndex %>" value="<%= optionIndex %>" required>
+                <label for="option<%= questionIndex %>_<%= optionIndex %>" class="option-label">
+                  <span class="option-indicator">
+                    <span class="option-letter"><%= String.fromCharCode(65 + optionIndex) %></span>
+                  </span>
+                  <span class="option-text"><%= option %></span>
+                </label>
+              </div>
+            <% }) %>
+          </div>
+          
+        <% } else if (question.type === 'short_answer') { %>
+          <!-- Câu hỏi trả lời ngắn -->
+          <div class="short-answer-container">
+            <input type="text" class="form-control short-answer-input" name="question_<%= questionIndex %>" placeholder="Nhập câu trả lời của bạn..." required>
+          </div>
+          
+        <% } else if (question.type === 'matching') { %>
+          <!-- Câu hỏi nối -->
+          <div class="matching-question" data-question-index="<%= questionIndex %>">
+            <div class="matching-instruction">
+              <i class="bi bi-arrows-move"></i> Kéo thả hoặc click để nối các phần tử tương ứng
+            </div>
+            
+            <div class="matching-container">
+              <div class="matching-column">
+                <h4>Cột A</h4>
+                <div class="matching-items" id="leftItems<%= questionIndex %>">
+                  <% question.matchingPairs.forEach((pair, pairIndex) => { %>
+                    <div class="matching-item left-item" data-index="<%= pairIndex %>" draggable="true">
+                      <div class="item-content">
+                        <% if (pair.leftType === 'text') { %>
+                          <%= pair.left %>
+                        <% } else { %>
+                          <img src="<%= pair.left %>" class="matching-img" alt="Hình ảnh">
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+              
+              <div class="matching-column">
+                <h4>Cột B</h4>
+                <div class="matching-items" id="rightItems<%= questionIndex %>">
+                  <% 
+                    const shuffledPairs = [...question.matchingPairs].sort(() => Math.random() - 0.5);
+                  %>
+                  <% shuffledPairs.forEach((pair, pairIndex) => { %>
+                    <div class="matching-item right-item" data-index="<%= question.matchingPairs.findIndex(p => p.right === pair.right) %>" data-drop-zone="true">
+                      <div class="item-content">
+                        <% if (pair.rightType === 'text') { %>
+                          <%= pair.right %>
+                        <% } else { %>
+                          <img src="<%= pair.right %>" class="matching-img" alt="Hình ảnh">
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            </div>
+            
+            <input type="hidden" name="question_<%= questionIndex %>" class="matching-answer" value="">
+            <div class="matching-status"></div>
+          </div>
+        <% } %>
+      </div>
+    <% }); %>
+    
+    <div class="quiz-footer">
+      <a href="/student/quizzes" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+      </a>
+      <button type="submit" class="btn btn-primary" id="submitBtn">
+        <i class="bi bi-check-circle"></i> Nộp bài
+      </button>
+    </div>
+  </form>
+</div>
+
+<%- contentFor('extraStyles') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<style>
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .quiz-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .quiz-header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  .quiz-title {
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .quiz-description {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  
+  .question-container {
+    background: rgba(255, 255, 255, 0.95);
+    margin-bottom: 30px;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+  }
+  
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .question-number {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-right: 10px;
+  }
+  
+  .question-title {
+    color: #2c3e50;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+  }
+  
+  .question-equation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+  }
+  
+  .equation-icon {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-style: italic;
+  }
+  
+  .question-image {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .question-image img {
+    max-height: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .option-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+  }
+  
+  .option-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+  }
+  
+  .option-item input[type="radio"] {
+    display: none;
+  }
+  
+  /* Trạng thái khi được chọn */
+  .option-item input[type="radio"]:checked + .option-label {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    transform: scale(1.02);
+  }
+  
+  .option-item input[type="radio"]:checked + .option-label .option-indicator {
+    background: #fff;
+    color: #007bff;
+    border: 2px solid #fff;
+  }
+  
+  .option-item input[type="radio"]:checked + .option-label .option-text {
+    color: white;
+    font-weight: 600;
+  }
+  
+  .option-label {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .option-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-right: 15px;
+    border-radius: 50%;
+    background: #e1f5fe;
+    font-weight: 600;
+    color: #01579b;
+    border: 2px solid #e1f5fe;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .option-indicator::after {
+    content: '✓';
+    position: absolute;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .option-item input[type="radio"]:checked + .option-label .option-indicator::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .option-text {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+  }
+  
+  .short-answer-container {
+    margin-bottom: 20px;
+  }
+  
+  .short-answer-input {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 1.1rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .short-answer-input:focus {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+  }
+  
+  .matching-question {
+    margin-bottom: 20px;
+  }
+  
+  .matching-instruction {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    color: #1976d2;
+    font-weight: 500;
+  }
+  
+  .matching-instruction i {
+    margin-right: 8px;
+  }
+  
+  .matching-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+  }
+  
+  .matching-column {
+    flex: 1;
+  }
+  
+  .matching-column h4 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+  
+  .matching-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .matching-item {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: move;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .matching-item:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+  }
+  
+  .matching-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+  }
+  
+  .matching-item.matched {
+    background: #e8f5e8;
+    border-color: #4caf50;
+    color: #2e7d32;
+  }
+  
+  .matching-item.drag-over {
+    background: #fff3e0;
+    border-color: #ff9800;
+    transform: scale(1.05);
+  }
+  
+  .left-item .item-connector {
+    width: 20px;
+    height: 3px;
+    background: #2196f3;
+    margin-left: 10px;
+    border-radius: 2px;
+  }
+  
+  .right-item .item-connector {
+    width: 20px;
+    height: 3px;
+    background: #2196f3;
+    margin-right: 10px;
+    border-radius: 2px;
+  }
+  
+  .right-item {
+    flex-direction: row-reverse;
+  }
+  
+  .item-content {
+    flex: 1;
+    font-weight: 500;
+    text-align: center;
+  }
+  
+  .matching-img {
+    max-height: 60px;
+    max-width: 100%;
+    border-radius: 5px;
+  }
+  
+  .matching-status {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .quiz-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  .quiz-footer .btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .quiz-footer .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .quiz-footer .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+  }
+</style>
+
+<%- contentFor('extraScripts') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const quizForm = document.getElementById('quizForm');
+    
+    // Xử lý câu hỏi nối với drag and drop
+    const matchingQuestions = document.querySelectorAll('.matching-question');
+    
+    matchingQuestions.forEach(matchingQuestion => {
+      const questionIndex = matchingQuestion.getAttribute('data-question-index');
+      const leftItems = matchingQuestion.querySelectorAll('.left-item');
+      const rightItems = matchingQuestion.querySelectorAll('.right-item');
+      const matchingAnswer = matchingQuestion.querySelector('.matching-answer');
+      const matchStatus = matchingQuestion.querySelector('.matching-status');
+      
+      // Đối tượng lưu trữ các kết nối đã được tạo
+      const matches = {};
+      
+      // Thiết lập chức năng kéo thả cho các phần tử bên trái
+      leftItems.forEach(leftItem => {
+        // Sự kiện khi bắt đầu kéo một phần tử
+        leftItem.addEventListener('dragstart', function(e) {
+          // Lưu chỉ số của phần tử được kéo vào dataTransfer
+          e.dataTransfer.setData('text/plain', this.getAttribute('data-index'));
+          // Thêm hiệu ứng visual khi đang kéo
+          this.classList.add('dragging');
+        });
+        
+        // Sự kiện khi kết thúc việc kéo
+        leftItem.addEventListener('dragend', function(e) {
+          // Xóa hiệu ứng visual khi kết thúc kéo
+          this.classList.remove('dragging');
+        });
+      });
+      
+      // Thiết lập chức năng thả cho các phần tử bên phải
+      rightItems.forEach(rightItem => {
+        // Sự kiện khi một phần tử được kéo vào vùng thả
+        rightItem.addEventListener('dragover', function(e) {
+          // Ngăn chặn hành vi mặc định để cho phép thả
+          e.preventDefault();
+          // Thêm hiệu ứng visual khi có phần tử được kéo qua
+          this.classList.add('drag-over');
+        });
+        
+        // Sự kiện khi phần tử được kéo ra khỏi vùng thả
+        rightItem.addEventListener('dragleave', function(e) {
+          // Xóa hiệu ứng visual khi rời khỏi vùng thả
+          this.classList.remove('drag-over');
+        });
+        
+        // Sự kiện khi thả một phần tử vào vùng thả
+        rightItem.addEventListener('drop', function(e) {
+          // Ngăn chặn hành vi mặc định
+          e.preventDefault();
+          // Xóa hiệu ứng visual
+          this.classList.remove('drag-over');
+          
+          // Lấy chỉ số của phần tử bên trái được kéo
+          const leftIndex = e.dataTransfer.getData('text/plain');
+          // Lấy chỉ số của phần tử bên phải được thả vào
+          const rightIndex = this.getAttribute('data-index');
+          
+          // Xóa kết nối cũ nếu phần tử bên phải đã được nối trước đó
+          for (const [key, value] of Object.entries(matches)) {
+            if (value === rightIndex) {
+              delete matches[key];
+              // Bỏ highlight cho phần tử bên trái cũ
+              const oldLeftItem = Array.from(leftItems).find(item => item.getAttribute('data-index') === key);
+              if (oldLeftItem) {
+                oldLeftItem.classList.remove('matched');
+              }
+            }
+          }
+          
+          // Xóa kết nối cũ của phần tử bên trái nếu đã được nối trước đó
+          if (matches[leftIndex]) {
+            const oldRightItem = Array.from(rightItems).find(item => item.getAttribute('data-index') === matches[leftIndex]);
+            if (oldRightItem) {
+              oldRightItem.classList.remove('matched');
+            }
+          }
+          
+          // Tạo kết nối mới giữa phần tử bên trái và bên phải
+          matches[leftIndex] = rightIndex;
+          
+          // Thêm hiệu ứng visual cho các phần tử đã được nối
+          const leftItem = Array.from(leftItems).find(item => item.getAttribute('data-index') === leftIndex);
+          if (leftItem) {
+            leftItem.classList.add('matched');
+          }
+          this.classList.add('matched');
+          
+          // Cập nhật thanh tiến trình và trạng thái
+          updateMatchingStatus();
+        });
+      });
+      
+      // Tính năng click để nối (dành cho thiết bị cảm ứng hoặc không hỗ trợ drag-drop)
+      let selectedLeftItem = null;
+      
+      // Xử lý khi click vào phần tử bên trái
+      leftItems.forEach(leftItem => {
+        leftItem.addEventListener('click', function() {
+          // Bỏ chọn phần tử trước đó nếu có
+          if (selectedLeftItem) {
+            selectedLeftItem.classList.remove('selected');
+          }
+          // Chọn phần tử hiện tại
+          this.classList.add('selected');
+          selectedLeftItem = this;
+        });
+      });
+      
+      // Xử lý khi click vào phần tử bên phải
+      rightItems.forEach(rightItem => {
+        rightItem.addEventListener('click', function() {
+          // Kiểm tra xem đã chọn phần tử bên trái chưa
+          if (!selectedLeftItem) {
+            alert('Vui lòng chọn một phần tử bên trái trước.');
+            return;
+          }
+          
+          const leftIndex = selectedLeftItem.getAttribute('data-index');
+          const rightIndex = this.getAttribute('data-index');
+          
+          // Xóa kết nối cũ nếu phần tử bên phải đã được nối
+          for (const [key, value] of Object.entries(matches)) {
+            if (value === rightIndex) {
+              delete matches[key];
+              const oldLeftItem = Array.from(leftItems).find(item => item.getAttribute('data-index') === key);
+              if (oldLeftItem) {
+                oldLeftItem.classList.remove('matched');
+              }
+            }
+          }
+          
+          // Xóa kết nối cũ của phần tử bên trái
+          if (matches[leftIndex]) {
+            const oldRightItem = Array.from(rightItems).find(item => item.getAttribute('data-index') === matches[leftIndex]);
+            if (oldRightItem) {
+              oldRightItem.classList.remove('matched');
+            }
+          }
+          
+          // Tạo kết nối mới
+          matches[leftIndex] = rightIndex;
+          
+          // Cập nhật giao diện
+          selectedLeftItem.classList.add('matched');
+          selectedLeftItem.classList.remove('selected');
+          this.classList.add('matched');
+          selectedLeftItem = null;
+          
+          // Cập nhật trạng thái
+          updateMatchingStatus();
+        });
+      });
+      
+      // Hàm cập nhật trạng thái nối và thanh tiến trình
+      function updateMatchingStatus() {
+        const matchCount = Object.keys(matches).length; // Số lượng cặp đã nối
+        const totalItems = leftItems.length; // Tổng số phần tử cần nối
+        const percentage = (matchCount / totalItems) * 100; // Phần trăm hoàn thành
+        
+        // Hiển thị thanh tiến trình
+        matchStatus.innerHTML = `
+          <div class="progress" style="height: 25px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: ${percentage}%">
+              Đã nối: ${matchCount}/${totalItems}
+            </div>
+          </div>
+        `;
+        
+        // Lưu kết quả vào input ẩn để gửi lên server
+        matchingAnswer.value = JSON.stringify(matches);
+      }
+      
+      // Khởi tạo trạng thái ban đầu (0/tổng số)
+      updateMatchingStatus();
+    });
+    
+    // Kiểm tra tính hợp lệ của form trước khi submit
+    quizForm.addEventListener('submit', function(e) {
+      let allAnswered = true; // Biến kiểm tra xem tất cả câu hỏi đã được trả lời chưa
+      
+      // Kiểm tra câu hỏi trắc nghiệm
+      const multipleChoiceQuestions = document.querySelectorAll('.options-grid');
+      multipleChoiceQuestions.forEach(question => {
+        const radios = question.querySelectorAll('input[type="radio"]');
+        const answered = Array.from(radios).some(radio => radio.checked);
+        if (!answered) {
+          allAnswered = false;
+        }
+      });
+      
+      // Kiểm tra câu hỏi trả lời ngắn
+      const shortAnswerInputs = document.querySelectorAll('.short-answer-input');
+      shortAnswerInputs.forEach(input => {
+        if (!input.value.trim()) {
+          allAnswered = false;
+        }
+      });
+      
+      // Kiểm tra câu hỏi nối
+      const matchingQuestions = document.querySelectorAll('.matching-question');
+      matchingQuestions.forEach(question => {
+        const leftItems = question.querySelectorAll('.left-item');
+        const matchingAnswer = question.querySelector('.matching-answer');
+        const matches = matchingAnswer.value ? JSON.parse(matchingAnswer.value) : {};
+        
+        // Kiểm tra xem tất cả phần tử bên trái đã được nối chưa
+        if (Object.keys(matches).length !== leftItems.length) {
+          allAnswered = false;
+        }
+      });
+      
+      // Nếu chưa trả lời hết, hỏi người dùng có muốn tiếp tục không
+      if (!allAnswered) {
+        if (!confirm('Bạn chưa trả lời tất cả các câu hỏi. Bạn vẫn muốn nộp bài?')) {
+          e.preventDefault(); // Ngăn chặn việc submit form
+          return;
+        }
+      }
+    });
+  });
+</script>

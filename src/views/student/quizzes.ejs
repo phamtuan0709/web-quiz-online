@@ -1,0 +1,44 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Danh sách bài kiểm tra</h5>
+      </div>
+      <div class="card-body">
+        <% if (quizzes && quizzes.length > 0) { %>
+          <div class="row">
+            <% quizzes.forEach(quiz => { %>
+              <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title"><%= quiz.title %></h5>
+                    <p class="card-text"><%= quiz.description || 'Không có mô tả' %></p>
+                    <p class="text-muted small">Số câu hỏi: <%= quiz.questions.length %></p>
+                  </div>
+                  <div class="card-footer bg-white">
+                    <% if (attemptedQuizIds.includes(quiz._id.toString())) { %>
+                      <a href="/student/quiz/<%= quiz._id %>/result" class="btn btn-info w-100">
+                        <i class="bi bi-check-circle"></i> Đã làm - Xem kết quả
+                      </a>
+                    <% } else { %>
+                      <a href="/student/quiz/<%= quiz._id %>" class="btn btn-primary w-100">
+                        <i class="bi bi-pencil-square"></i> Làm bài
+                      </a>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="alert alert-info">
+            <p>Hiện tại chưa có bài kiểm tra nào khả dụng.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('extraStyles') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">

@@ -1,0 +1,116 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Kết quả bài kiểm tra: <%= quiz.title %></h5>
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <h3>Điểm số của bạn</h3>
+          <div class="display-1 fw-bold <%= attempt.percentageScore >= 70 ? 'text-success' : (attempt.percentageScore >= 40 ? 'text-warning' : 'text-danger') %>">
+            <%= attempt.percentageScore %>%
+          </div>
+          <div class="row mt-4 justify-content-center">
+            <div class="col-md-8">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>Số câu đúng:</div>
+                    <div class="fw-bold text-success"><%= attempt.totalCorrect %> / <%= attempt.totalQuestions %></div>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <div>Số câu sai:</div>
+                    <div class="fw-bold text-danger"><%= attempt.totalQuestions - attempt.totalCorrect %> / <%= attempt.totalQuestions %></div>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <div>Thời gian hoàn thành:</div>
+                    <div class="fw-bold"><%= new Date(attempt.completedAt).toLocaleString('vi-VN') %></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Biểu đồ thống kê -->
+              <div class="progress" style="height: 30px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: <%= attempt.percentageScore %>%" 
+                     aria-valuenow="<%= attempt.percentageScore %>" aria-valuemin="0" aria-valuemax="100">
+                  <%= attempt.percentageScore %>%
+                </div>
+                <div class="progress-bar bg-danger" role="progressbar" 
+                     style="width: <%= 100 - attempt.percentageScore %>%"
+                     aria-valuenow="<%= 100 - attempt.percentageScore %>" aria-valuemin="0" aria-valuemax="100">
+                  <%= 100 - attempt.percentageScore %>%
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion mt-4" id="quizResults">
+          <% quiz.questions.forEach((question, questionIndex) => { 
+              // Find the student's answer for this question
+              const answer = attempt.answers.find(a => a.questionIndex === questionIndex);
+              const isCorrect = answer && answer.correct;
+              const selectedIndex = answer ? answer.answerIndex : null;
+          %>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading<%= questionIndex %>">
+                <button class="accordion-button collapsed <%= isCorrect ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= questionIndex %>">
+                  <div class="d-flex w-100 justify-content-between align-items-center">
+                    <span>Câu hỏi <%= questionIndex + 1 %>: <%= question.text.substring(0, 50) %><%= question.text.length > 50 ? '...' : '' %></span>
+                    <span class="badge <%= isCorrect ? 'bg-success' : 'bg-danger' %> ms-2">
+                      <%= isCorrect ? 'Đúng' : 'Sai' %>
+                    </span>
+                  </div>
+                </button>
+              </h2>
+              <div id="collapse<%= questionIndex %>" class="accordion-collapse collapse" data-bs-parent="#quizResults">
+                <div class="accordion-body">
+                  <p class="fw-bold"><%= question.text %></p>
+                  <div class="options-list">
+                    <% question.options.forEach((option, optIndex) => { 
+                        const isSelected = selectedIndex === optIndex;
+                        const isCorrectOption = optIndex === question.correctOptionIndex;
+                        
+                        let optionClass = "";
+                        if (isSelected && isCorrectOption) optionClass = "text-success fw-bold";
+                        else if (isSelected && !isCorrectOption) optionClass = "text-danger fw-bold";
+                        else if (!isSelected && isCorrectOption) optionClass = "text-success";
+                    %>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" disabled 
+                              <%= isSelected ? 'checked' : '' %>>
+                        <label class="form-check-label <%= optionClass %>">
+                          <%= option %>
+                          <% if (isSelected) { %>
+                            <%= isCorrectOption ? ' ✓' : ' ✗' %>
+                          <% } else if (isCorrectOption) { %>
+                            (Đáp án đúng)
+                          <% } %>
+                        </label>
+                      </div>
+                    <% }); %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+        <div class="text-center mt-4">
+          <a href="/student/quizzes" class="btn btn-primary">Quay lại danh sách bài kiểm tra</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('extraStyles') %>
+<style>
+  .accordion-button::after {
+    margin-left: 10px;
+  }
+  .progress {
+    height: 30px;
+    font-weight: bold;
+  }
+</style>

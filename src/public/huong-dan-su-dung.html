@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn sử dụng Hệ Thống Trắc Nghiệm Online</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #0d6efd;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0d6efd;
+        }
+        h2 {
+            color: #0d6efd;
+            margin-top: 40px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        h3 {
+            color: #198754;
+            margin-top: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .note {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        ol, ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #0d6efd;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        .step {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #0d6efd;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hướng Dẫn Sử Dụng Hệ Thống Trắc Nghiệm Online</h1>
+    
+    <div class="note">
+        <strong>Lưu ý:</strong> Hướng dẫn này được viết với ngôn ngữ đơn giản nhất có thể để mọi người đều có thể dễ dàng sử dụng hệ thống trắc nghiệm online.
+    </div>
+    
+    <div class="section">
+        <h2>Mục lục</h2>
+        <ol>
+            <li><a href="#overview">Tổng quan về hệ thống</a></li>
+            <li><a href="#students">Dành cho học sinh</a></li>
+            <li><a href="#teachers">Dành cho giáo viên</a></li>
+            <li><a href="#admin">Dành cho quản trị viên</a></li>
+            <li><a href="#faq">Câu hỏi thường gặp</a></li>
+        </ol>
+    </div>
+    
+    <div id="overview" class="section">
+        <h2>1. Tổng quan về hệ thống</h2>
+        <p>Hệ thống trắc nghiệm online là nơi giáo viên có thể tạo các bài kiểm tra trực tuyến và học sinh có thể làm bài ngay trên máy tính. Hệ thống này hoạt động trong mạng nội bộ của phòng máy tính học.</p>
+        
+        <h3>Các tính năng chính:</h3>
+        <ul>
+            <li><strong>Dành cho giáo viên:</strong> Tạo, chỉnh sửa bài kiểm tra; xem kết quả của học sinh</li>
+            <li><strong>Dành cho học sinh:</strong> Làm bài kiểm tra trắc nghiệm; xem kết quả ngay sau khi hoàn thành</li>
+        </ul>
+        
+        <h3>Cách truy cập hệ thống:</h3>
+        <p>Để truy cập hệ thống, bạn chỉ cần mở trình duyệt web (như Chrome, Firefox, Edge) và nhập địa chỉ:</p>
+        <div class="card text-center">
+            <strong>http://[địa-chỉ-IP-máy-chủ]:3000</strong>
+        </div>
+        <p>Địa chỉ IP máy chủ sẽ được giáo viên hoặc quản trị viên cung cấp cho bạn.</p>
+    </div>
+
+    <div id="students" class="section">
+        <h2>2. Dành cho học sinh</h2>
+
+        <h3>2.1. Cách vào làm bài kiểm tra</h3>
+        <div class="step">
+            <strong>Bước 1:</strong> Mở trình duyệt web và truy cập địa chỉ hệ thống.
+        </div>
+        <div class="step">
+            <strong>Bước 2:</strong> Tại trang chủ, nhấn vào nút "Vào trang Học sinh".
+        </div>
+        <div class="step">
+            <strong>Bước 3:</strong> Nhập họ tên đầy đủ và lớp của bạn, sau đó nhấn nút "Vào làm bài".
+        </div>
+        <div class="step">
+            <strong>Bước 4:</strong> Bạn sẽ thấy danh sách các bài kiểm tra hiện có. Nhấn vào nút "Làm bài" bên dưới bài kiểm tra bạn muốn làm.
+        </div>
+
+        <h3>2.2. Cách làm bài kiểm tra</h3>
+        <div class="step">
+            <strong>Bước 1:</strong> Đọc kỹ tiêu đề và mô tả bài kiểm tra (nếu có).
+        </div>
+        <div class="step">
+            <strong>Bước 2:</strong> Đọc từng câu hỏi và chọn đáp án bằng cách nhấn vào nút tròn bên cạnh đáp án bạn cho là đúng.
+        </div>
+        <div class="step">
+            <strong>Bước 3:</strong> Sau khi trả lời tất cả các câu hỏi (hoặc những câu bạn biết), nhấn nút "Nộp bài" ở cuối trang.
+        </div>
+        <div class="step">
+            <strong>Bước 4:</strong> Nếu bạn chưa trả lời hết các câu hỏi, hệ thống sẽ hiển thị thông báo. Bạn có thể chọn tiếp tục nộp bài hoặc quay lại để trả lời các câu còn thiếu.
+        </div>
+        
+        <h3>2.3. Xem kết quả</h3>
+        <p>Ngay sau khi nộp bài, bạn sẽ được chuyển đến trang kết quả. Tại đây bạn có thể:</p>
+        <ul>
+            <li>Xem điểm số tổng của bạn</li>
+            <li>Xem từng câu hỏi và đáp án bạn đã chọn</li>
+            <li>Biết được câu nào bạn trả lời đúng, câu nào sai</li>
+            <li>Xem đáp án đúng của từng câu hỏi</li>
+        </ul>
+        
+        <p>Để xem chi tiết kết quả của một câu hỏi, hãy nhấn vào câu hỏi đó trong danh sách.</p>
+        
+        <h3>2.4. Quay lại danh sách bài kiểm tra</h3>
+        <p>Sau khi xem kết quả, bạn có thể:</p>
+        <ul>
+            <li>Nhấn nút "Quay lại danh sách bài kiểm tra" để làm các bài kiểm tra khác</li>
+            <li>Nhấn vào "Đăng xuất" ở góc phải trên cùng nếu bạn đã hoàn thành tất cả bài kiểm tra</li>
+        </ul>
+    </div>
+
+    <div id="teachers" class="section">
+        <h2>3. Dành cho giáo viên</h2>
+
+        <h3>3.1. Đăng nhập vào hệ thống</h3>
+        <div class="step">
+            <strong>Bước 1:</strong> Tại trang chủ, nhấn vào nút "Đăng nhập Giáo viên".
+        </div>
+        <div class="step">
+            <strong>Bước 2:</strong> Nhập tên đăng nhập và mật khẩu của bạn, sau đó nhấn "Đăng nhập".
+        </div>
+        <div class="step">
+            <strong>Bước 3:</strong> Nếu bạn chưa có tài khoản và là người đầu tiên sử dụng hệ thống, nhấn vào "Đăng ký" và điền thông tin cần thiết.
+        </div>
+
+        <h3>3.2. Tạo bài kiểm tra mới</h3>
+        <div class="step">
+            <strong>Bước 1:</strong> Tại bảng điều khiển giáo viên, nhấn nút "Tạo bài kiểm tra mới".
+        </div>
+        <div class="step">
+            <strong>Bước 2:</strong> Nhập tiêu đề và mô tả cho bài kiểm tra.
+        </div>
+        <div class="step">
+            <strong>Bước 3:</strong> Thêm câu hỏi bằng cách nhấn nút "Thêm câu hỏi".
+        </div>
+        <div class="step">
+            <strong>Bước 4:</strong> Đối với mỗi câu hỏi:
+            <ul>
+                <li>Nhập nội dung câu hỏi</li>
+                <li>Thêm các đáp án (nhấn nút "Thêm đáp án" nếu cần thêm)</li>
+                <li>Đánh dấu đáp án đúng bằng cách chọn nút tròn bên cạnh đáp án đó</li>
+            </ul>
+        </div>
+        <div class="step">
+            <strong>Bước 5:</strong> Nhấn "Lưu bài kiểm tra" khi đã hoàn thành.
+        </div>
+
+        <h3>3.3. Quản lý bài kiểm tra</h3>
+        <p>Tại bảng điều khiển giáo viên, bạn có thể:</p>
+        <ul>
+            <li><strong>Sửa bài kiểm tra:</strong> Nhấn nút "Sửa" bên cạnh bài kiểm tra</li>
+            <li><strong>Đóng/Mở bài kiểm tra:</strong> Nhấn nút "Đóng" hoặc "Mở" để thay đổi trạng thái của bài kiểm tra. Học sinh chỉ có thể làm những bài kiểm tra đang mở</li>
+            <li><strong>Xem kết quả:</strong> Nhấn nút "Kết quả" để xem kết quả của học sinh đã làm bài</li>
+            <li><strong>Xóa bài kiểm tra:</strong> Nhấn nút "Xóa" nếu bạn muốn xóa hoàn toàn bài kiểm tra</li>
+        </ul>
+
+        <h3>3.4. Xem kết quả của học sinh</h3>
+        <div class="step">
+            <strong>Bước 1:</strong> Tại bảng điều khiển giáo viên, nhấn nút "Kết quả" bên cạnh bài kiểm tra bạn muốn xem.
+        </div>
+        <div class="step">
+            <strong>Bước 2:</strong> Bạn sẽ thấy danh sách học sinh đã làm bài cùng với điểm số của họ.
+        </div>
+        <div class="step">
+            <strong>Bước 3:</strong> Nhấn vào tên học sinh để xem chi tiết bài làm của họ.
+        </div>
+    </div>
+
+    <div id="admin" class="section">
+        <h2>4. Dành cho quản trị viên</h2>
+
+        <h3>4.1. Cài đặt và khởi động hệ thống</h3>
+        <p>Đây là phần dành cho người quản trị kỹ thuật.</p>
+        
+        <h4>Bước 1: Cài đặt MongoDB</h4>
+        <p>Trước tiên, cần cài đặt MongoDB trên máy chủ:</p>
+        <ul>
+            <li>Tải MongoDB từ <a href="https://www.mongodb.com/try/download/community">trang chủ MongoDB</a></li>
+            <li>Cài đặt theo hướng dẫn của từng hệ điều hành</li>
+        </ul>
+        
+        <h4>Bước 2: Khởi động MongoDB</h4>
+        <div class="card">
+            <h5>Trên macOS (sử dụng Homebrew):</h5>
+            <pre>brew services start mongodb/brew/mongodb-community</pre>
+            
+            <h5>Trên Windows:</h5>
+            <ul>
+                <li>Mở Command Prompt với quyền Administrator</li>
+                <li>Chạy lệnh: <code>net start MongoDB</code></li>
+                <li>Hoặc khởi động từ Services trong Control Panel</li>
+            </ul>
+            
+            <h5>Trên Linux (Ubuntu/Debian):</h5>
+            <pre>sudo systemctl start mongod</pre>
+        </div>
+        
+        <h4>Bước 3: Cài đặt dependencies</h4>
+        <p>Di chuyển vào thư mục dự án và cài đặt các package cần thiết:</p>
+        <pre>cd "Web quizz"
+npm install</pre>
+        
+        <h4>Bước 4: Khởi động server</h4>
+        <p>Có 3 cách để khởi động server:</p>
+        
+        <div class="step">
+            <strong>Cách 1: Chế độ Production (khuyến nghị cho sử dụng thực tế)</strong>
+            <pre>npm start</pre>
+        </div>
+        
+        <div class="step">
+            <strong>Cách 2: Chế độ Development (khuyến nghị cho phát triển)</strong>
+            <pre>npm run dev</pre>
+            <p><em>Chế độ này sẽ tự động khởi động lại server khi có thay đổi trong code</em></p>
+        </div>
+        
+        <div class="step">
+            <strong>Cách 3: Khởi động trực tiếp</strong>
+            <pre>node src/index.js</pre>
+        </div>
+        
+        <h4>Bước 5: Kiểm tra kết quả</h4>
+        <p>Sau khi server khởi động thành công, bạn sẽ thấy thông báo:</p>
+        <div class="card text-center">
+            <code>Server running on http://localhost:3000</code>
+        </div>
+
+        <h3>4.2. Xác định địa chỉ IP của hệ thống</h3>
+        <p>Để học sinh có thể truy cập hệ thống, quản trị viên cần cung cấp địa chỉ IP của máy chủ cho họ.</p>
+        
+        <h4>Cách tìm địa chỉ IP:</h4>
+        <div class="card">
+            <h5>Trên Windows:</h5>
+            <ul>
+                <li>Nhấn <kbd>Win + R</kbd>, gõ <code>cmd</code> và nhấn Enter</li>
+                <li>Gõ lệnh: <code>ipconfig</code></li>
+                <li>Tìm dòng "IPv4 Address" trong phần "Ethernet adapter" hoặc "Wi-Fi adapter"</li>
+            </ul>
+            
+            <h5>Trên macOS:</h5>
+            <ul>
+                <li>Mở Terminal</li>
+                <li>Gõ lệnh: <code>ifconfig</code></li>
+                <li>Tìm dòng "inet" trong phần "en0" (Wi-Fi) hoặc "en1" (Ethernet)</li>
+            </ul>
+            
+            <h5>Trên Linux:</h5>
+            <ul>
+                <li>Mở Terminal</li>
+                <li>Gõ lệnh: <code>ip addr</code> hoặc <code>ifconfig</code></li>
+                <li>Tìm địa chỉ IP trong phần card mạng đang sử dụng</li>
+            </ul>
+        </div>
+        
+        <p>Địa chỉ IP thường có dạng: <strong>192.168.x.x</strong> hoặc <strong>10.x.x.x</strong></p>
+        
+        <h3>4.3. Khắc phục sự cố thường gặp</h3>
+        <div class="card">
+            <h5>Lỗi MongoDB không kết nối được:</h5>
+            <pre>Error: connect ECONNREFUSED 127.0.0.1:27017</pre>
+            <p><strong>Giải pháp:</strong> Đảm bảo MongoDB đã được khởi động trước khi chạy ứng dụng.</p>
+        </div>
+        
+        <div class="card">
+            <h5>Lỗi Port đã được sử dụng:</h5>
+            <pre>Error: listen EADDRINUSE: address already in use :::3000</pre>
+            <p><strong>Giải pháp:</strong></p>
+            <ul>
+                <li>Dừng tiến trình đang sử dụng port 3000</li>
+                <li>Hoặc thay đổi port trong file <code>src/index.js</code></li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h5>Lỗi thiếu dependencies:</h5>
+            <pre>Error: Cannot find module 'express'</pre>
+            <p><strong>Giải pháp:</strong> Chạy lại <code>npm install</code> để cài đặt các package cần thiết.</p>
+        </div>
+        
+        <h3>4.4. Dừng server</h3>
+        <p>Để dừng server, nhấn <kbd>Ctrl + C</kbd> trong terminal đang chạy ứng dụng.</p>
+    </div>
+
+    <div id="faq" class="section">
+        <h2>5. Câu hỏi thường gặp</h2>
+
+        <div class="card">
+            <h3>Tôi không thể đăng nhập vào hệ thống?</h3>
+            <p><strong>Trả lời:</strong> Kiểm tra lại tên đăng nhập và mật khẩu. Nếu bạn là học sinh, hãy chắc chắn rằng bạn đã nhập đúng họ tên và lớp. Nếu vẫn không được, hãy liên hệ với giáo viên hoặc quản trị viên.</p>
+        </div>
+
+        <div class="card">
+            <h3>Làm thế nào để biết bài kiểm tra nào tôi có thể làm?</h3>
+            <p><strong>Trả lời:</strong> Sau khi đăng nhập với tư cách học sinh, bạn sẽ thấy danh sách các bài kiểm tra có sẵn. Chỉ những bài kiểm tra mà giáo viên đã mở mới hiển thị ở đây.</p>
+        </div>
+
+        <div class="card">
+            <h3>Tôi đã làm xong bài kiểm tra nhưng không thấy kết quả?</h3>
+            <p><strong>Trả lời:</strong> Sau khi nhấn nút "Nộp bài", bạn sẽ được tự động chuyển đến trang kết quả. Nếu không, hãy kiểm tra lại kết nối internet và thử làm mới trang.</p>
+        </div>
+
+        <div class="card">
+            <h3>Làm thế nào để quay lại làm bài kiểm tra khác sau khi đã hoàn thành một bài?</h3>
+            <p><strong>Trả lời:</strong> Tại trang kết quả, nhấn nút "Quay lại danh sách bài kiểm tra" để trở về danh sách và chọn bài kiểm tra khác.</p>
+        </div>
+
+        <div class="card">
+            <h3>Tôi là giáo viên, làm thế nào để biết học sinh nào đã làm bài?</h3>
+            <p><strong>Trả lời:</strong> Tại bảng điều khiển giáo viên, nhấn nút "Kết quả" bên cạnh bài kiểm tra để xem danh sách học sinh đã làm bài và điểm số của họ.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© Hệ Thống Trắc Nghiệm Online - Phiên bản 1.0</p>
+        <p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ với giáo viên hoặc quản trị viên hệ thống.</p>
+    </div>
+</body>
+</html>

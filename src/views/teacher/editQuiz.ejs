@@ -1,0 +1,804 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">Chỉnh sửa bài kiểm tra: <%= quiz.title %></h5>
+      </div>
+      <div class="card-body">
+        <form id="editQuizForm" action="/teacher/quiz/edit/<%= quiz._id %>" method="POST">
+          <div class="mb-3">
+            <label for="title" class="form-label">Tiêu đề bài kiểm tra</label>
+            <input type="text" class="form-control" id="title" name="title" value="<%= quiz.title %>" required>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">Mô tả</label>
+            <textarea class="form-control" id="description" name="description" rows="2"><%= quiz.description || '' %></textarea>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Câu hỏi</h6>
+              <div>
+                <div class="dropdown d-inline-block">
+                  <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="addQuestionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-plus-circle"></i> Thêm câu hỏi
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="addQuestionDropdown">
+                    <li><a class="dropdown-item" href="#" id="addMultipleChoiceBtn">Trắc nghiệm</a></li>
+                    <li><a class="dropdown-item" href="#" id="addShortAnswerBtn">Trả lời ngắn</a></li>
+                    <li><a class="dropdown-item" href="#" id="addMatchingBtn">Nối đáp án</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="questionsContainer">
+                <!-- Existing questions will be loaded here -->
+              </div>
+              <div class="text-center mt-3" id="noQuestionsMessage" style="display: none;">
+                <p class="text-muted">Chưa có câu hỏi nào. Nhấn nút "Thêm câu hỏi" để bắt đầu.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="/teacher/dashboard" class="btn btn-secondary">Hủy</a>
+            <button type="submit" class="btn btn-warning" id="saveQuizBtn">Cập nhật bài kiểm tra</button>
+          </div>
+
+          <!-- Hidden field to store the questions data -->
+          <input type="hidden" name="questions" id="questionsData">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Multiple Choice Question Template (hidden) -->
+<template id="multipleChoiceTemplate">
+  <div class="question-item card mb-3" data-index="{INDEX}" data-type="multiple_choice">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">Câu hỏi <span class="question-number">{NUMBER}</span> (Trắc nghiệm)</h6>
+      <button type="button" class="btn btn-danger btn-sm remove-question">
+        <i class="bi bi-trash"></i> Xóa
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Nội dung câu hỏi</label>
+        <textarea class="form-control question-text" rows="2" required></textarea>
+      </div>
+      
+      <!-- Phần upload ảnh -->
+      <div class="mb-3">
+        <label class="form-label">Ảnh minh họa (tùy chọn)</label>
+        <div class="input-group">
+          <input type="file" class="form-control image-upload" accept="image/*">
+          <button type="button" class="btn btn-outline-primary upload-btn">Tải lên</button>
+        </div>
+        <div class="image-preview mt-2" style="display: none;">
+          <img src="" class="img-fluid img-thumbnail" style="max-height: 200px;">
+          <button type="button" class="btn btn-sm btn-outline-danger remove-image">Xóa ảnh</button>
+          <input type="hidden" class="question-image-path">
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label">Các đáp án</label>
+        <div class="options-container">
+          <!-- Options will be loaded here -->
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm add-option mt-2">
+          <i class="bi bi-plus"></i> Thêm đáp án
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Short Answer Question Template (hidden) -->
+<template id="shortAnswerTemplate">
+  <div class="question-item card mb-3" data-index="{INDEX}" data-type="short_answer">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">Câu hỏi <span class="question-number">{NUMBER}</span> (Trả lời ngắn)</h6>
+      <button type="button" class="btn btn-danger btn-sm remove-question">
+        <i class="bi bi-trash"></i> Xóa
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Nội dung câu hỏi</label>
+        <textarea class="form-control question-text" rows="2" required></textarea>
+      </div>
+      
+      <!-- Phần upload ảnh -->
+      <div class="mb-3">
+        <label class="form-label">Ảnh minh họa (tùy chọn)</label>
+        <div class="input-group">
+          <input type="file" class="form-control image-upload" accept="image/*">
+          <button type="button" class="btn btn-outline-primary upload-btn">Tải lên</button>
+        </div>
+        <div class="image-preview mt-2" style="display: none;">
+          <img src="" class="img-fluid img-thumbnail" style="max-height: 200px;">
+          <button type="button" class="btn btn-sm btn-outline-danger remove-image">Xóa ảnh</button>
+          <input type="hidden" class="question-image-path">
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label">Đáp án đúng</label>
+        <input type="text" class="form-control short-answer" placeholder="Nhập đáp án đúng" required>
+        <div class="form-text">Học sinh sẽ cần nhập câu trả lời khớp với đáp án này (không phân biệt hoa thường).</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Matching Question Template (hidden) -->
+<template id="matchingTemplate">
+  <div class="question-item card mb-3" data-index="{INDEX}" data-type="matching">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">Câu hỏi <span class="question-number">{NUMBER}</span> (Nối đáp án)</h6>
+      <button type="button" class="btn btn-danger btn-sm remove-question">
+        <i class="bi bi-trash"></i> Xóa
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Nội dung câu hỏi</label>
+        <textarea class="form-control question-text" rows="2" required></textarea>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label">Các cặp nối</label>
+        <div class="matching-pairs-container">
+          <!-- Matching pairs will be loaded here -->
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm add-pair mt-2">
+          <i class="bi bi-plus"></i> Thêm cặp nối
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<%- contentFor('extraStyles') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<style>
+  .question-item {
+    border-left: 3px solid #0d6efd;
+  }
+  .question-item[data-type="multiple_choice"] {
+    border-left-color: #0d6efd;
+  }
+  .question-item[data-type="short_answer"] {
+    border-left-color: #198754;
+  }
+  .question-item[data-type="matching"] {
+    border-left-color: #ffc107;
+  }
+  .matching-pair {
+    border-left: 3px solid #6f42c1;
+  }
+  .draggable {
+    cursor: move;
+  }
+</style>
+
+<%- contentFor('extraScripts') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const questionsContainer = document.getElementById('questionsContainer');
+    const addMultipleChoiceBtn = document.getElementById('addMultipleChoiceBtn');
+    const addShortAnswerBtn = document.getElementById('addShortAnswerBtn');
+    const addMatchingBtn = document.getElementById('addMatchingBtn');
+    const multipleChoiceTemplate = document.getElementById('multipleChoiceTemplate');
+    const shortAnswerTemplate = document.getElementById('shortAnswerTemplate');
+    const matchingTemplate = document.getElementById('matchingTemplate');
+    const editQuizForm = document.getElementById('editQuizForm');
+    const questionsData = document.getElementById('questionsData');
+    const noQuestionsMessage = document.getElementById('noQuestionsMessage');
+    
+    let questionCount = 0;
+    
+    // Load existing questions
+    const existingQuestions = <%- JSON.stringify(quiz.questions) %>;
+    
+    console.log('Existing questions:', existingQuestions);
+    console.log('Number of questions:', existingQuestions.length);
+    
+    // Load existing questions into the form
+    existingQuestions.forEach((question, index) => {
+      console.log(`Loading question ${index + 1}:`, question);
+      
+      if (question.type === 'multiple_choice' || !question.type) {
+        loadMultipleChoiceQuestion(question, index);
+      } else if (question.type === 'short_answer') {
+        loadShortAnswerQuestion(question, index);
+      } else if (question.type === 'matching') {
+        loadMatchingQuestion(question, index);
+      } else {
+        console.warn(`Unknown question type: ${question.type}`, question);
+        // Default to multiple choice for backward compatibility
+        loadMultipleChoiceQuestion(question, index);
+      }
+      questionCount++;
+    });
+    
+    console.log('Final question count:', questionCount);
+    updateNoQuestionsMessage();
+
+    // ...existing event listeners and functions from createQuiz.ejs...
+    
+    // Thêm các loại câu hỏi
+    addMultipleChoiceBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      addMultipleChoiceQuestion();
+    });
+    
+    addShortAnswerBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      addShortAnswerQuestion();
+    });
+    
+    addMatchingBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      addMatchingQuestion();
+    });
+
+    // Xóa câu hỏi
+    questionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-question') || e.target.closest('.remove-question')) {
+        const questionItem = e.target.closest('.question-item');
+        questionItem.remove();
+        updateQuestionNumbers();
+        updateNoQuestionsMessage();
+      }
+    });
+
+    // Thêm đáp án mới
+    questionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('add-option') || e.target.closest('.add-option')) {
+        const questionItem = e.target.closest('.question-item');
+        const optionsContainer = questionItem.querySelector('.options-container');
+        const questionIndex = questionItem.getAttribute('data-index');
+        
+        addOption(optionsContainer, questionIndex);
+      }
+    });
+
+    // Xóa đáp án
+    questionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-option') || e.target.closest('.remove-option')) {
+        const optionItem = e.target.closest('.option-item');
+        const optionsContainer = optionItem.closest('.options-container');
+        
+        if (optionsContainer.children.length > 1) {
+          optionItem.remove();
+        } else {
+          alert('Mỗi câu hỏi phải có ít nhất một đáp án');
+        }
+      }
+    });
+    
+    // Upload ảnh cho câu hỏi
+    questionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('upload-btn') || e.target.closest('.upload-btn')) {
+        const questionItem = e.target.closest('.question-item');
+        const fileInput = questionItem.querySelector('.image-upload');
+        const imagePreview = questionItem.querySelector('.image-preview');
+        const previewImg = imagePreview.querySelector('img');
+        const imagePath = questionItem.querySelector('.question-image-path');
+        
+        if (fileInput.files && fileInput.files[0]) {
+          const formData = new FormData();
+          formData.append('image', fileInput.files[0]);
+          
+          previewImg.src = '/img/loading.gif';
+          imagePreview.style.display = 'block';
+          
+          fetch('/teacher/upload-image', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              previewImg.src = data.imagePath;
+              imagePath.value = data.imagePath;
+              imagePreview.style.display = 'block';
+            } else {
+              alert('Lỗi khi tải ảnh lên: ' + data.message);
+              imagePreview.style.display = 'none';
+            }
+          })
+          .catch(error => {
+            console.error('Upload error:', error);
+            alert('Đã xảy ra lỗi khi tải ảnh lên.');
+            imagePreview.style.display = 'none';
+          });
+        }
+      }
+    });
+    
+    // Xóa ảnh đã upload
+    questionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-image') || e.target.closest('.remove-image')) {
+        const questionItem = e.target.closest('.question-item');
+        const imagePreview = questionItem.querySelector('.image-preview');
+        const imagePath = questionItem.querySelector('.question-image-path');
+        const fileInput = questionItem.querySelector('.image-upload');
+        
+        imagePreview.style.display = 'none';
+        imagePath.value = '';
+        fileInput.value = '';
+      }
+    });
+    
+    // Xử lý matching questions
+    questionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('add-pair') || e.target.closest('.add-pair')) {
+        const questionItem = e.target.closest('.question-item');
+        const pairsContainer = questionItem.querySelector('.matching-pairs-container');
+        const pairsCount = pairsContainer.querySelectorAll('.matching-pair').length;
+        
+        addMatchingPair(pairsContainer, pairsCount);
+      }
+      
+      if (e.target.classList.contains('remove-pair') || e.target.closest('.remove-pair')) {
+        const pairItem = e.target.closest('.matching-pair');
+        const pairsContainer = pairItem.closest('.matching-pairs-container');
+        
+        if (pairsContainer.children.length > 1) {
+          pairItem.remove();
+          pairsContainer.querySelectorAll('.matching-pair').forEach((pair, index) => {
+            pair.setAttribute('data-pair-index', index);
+            pair.querySelector('.card-header span').textContent = `Cặp ${index + 1}`;
+          });
+        } else {
+          alert('Cần ít nhất một cặp nối');
+        }
+      }
+    });
+    
+    // Submit form
+    editQuizForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (questionCount === 0) {
+        alert('Vui lòng thêm ít nhất một câu hỏi.');
+        return;
+      }
+      
+      const questions = [];
+      
+      document.querySelectorAll('.question-item').forEach(questionItem => {
+        const questionType = questionItem.getAttribute('data-type');
+        const questionText = questionItem.querySelector('.question-text').value.trim();
+        
+        if (!questionText) {
+          alert('Vui lòng nhập nội dung cho tất cả các câu hỏi.');
+          return;
+        }
+        
+        const imagePathInput = questionItem.querySelector('.question-image-path');
+        const imagePath = imagePathInput ? imagePathInput.value : null;
+        
+        const questionData = {
+          type: questionType,
+          text: questionText,
+          image: imagePath || null
+        };
+        
+        if (questionType === 'multiple_choice') {
+          const options = [];
+          let correctOptionIndex = -1;
+          
+          questionItem.querySelectorAll('.option-item').forEach((optionItem, index) => {
+            const optionText = optionItem.querySelector('.option-text').value.trim();
+            const isCorrect = optionItem.querySelector('.option-correct').checked;
+            
+            if (!optionText) {
+              alert('Vui lòng nhập nội dung cho tất cả các đáp án.');
+              return;
+            }
+            
+            options.push(optionText);
+            if (isCorrect) {
+              correctOptionIndex = index;
+            }
+          });
+          
+          if (correctOptionIndex === -1) {
+            alert('Mỗi câu hỏi phải có ít nhất một đáp án đúng.');
+            return;
+          }
+          
+          questionData.options = options;
+          questionData.correctOptionIndex = correctOptionIndex;
+        }
+        else if (questionType === 'short_answer') {
+          const shortAnswer = questionItem.querySelector('.short-answer').value.trim();
+          if (!shortAnswer) {
+            alert('Vui lòng nhập đáp án cho câu hỏi trả lời ngắn.');
+            return;
+          }
+          questionData.shortAnswer = shortAnswer;
+        }
+        else if (questionType === 'matching') {
+          const matchingPairs = [];
+          
+          questionItem.querySelectorAll('.matching-pair').forEach(pair => {
+            const leftType = pair.querySelector('.left-type').value;
+            const rightType = pair.querySelector('.right-type').value;
+            
+            let leftContent, rightContent;
+            
+            if (leftType === 'text') {
+              leftContent = pair.querySelector('.left-text').value.trim();
+            } else {
+              leftContent = pair.querySelector('.left-image-path').value;
+            }
+            
+            if (rightType === 'text') {
+              rightContent = pair.querySelector('.right-text').value.trim();
+            } else {
+              rightContent = pair.querySelector('.right-image-path').value;
+            }
+            
+            if (!leftContent || !rightContent) {
+              alert('Vui lòng nhập nội dung cho tất cả các cặp nối.');
+              return;
+            }
+            
+            matchingPairs.push({
+              left: leftContent,
+              right: rightContent,
+              leftType: leftType,
+              rightType: rightType
+            });
+          });
+          
+          if (matchingPairs.length < 2) {
+            alert('Câu hỏi nối cần ít nhất 2 cặp.');
+            return;
+          }
+          
+          questionData.matchingPairs = matchingPairs;
+        }
+        
+        questions.push(questionData);
+      });
+      
+      questionsData.value = JSON.stringify(questions);
+      editQuizForm.submit();
+    });
+
+    // Helper functions
+    function loadMultipleChoiceQuestion(question, index) {
+      const questionIndex = Date.now() + index;
+      
+      let html = multipleChoiceTemplate.innerHTML
+        .replace(/{INDEX}/g, questionIndex)
+        .replace(/{NUMBER}/g, index + 1);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const questionElement = tempDiv.firstElementChild;
+      
+      // Set question text
+      questionElement.querySelector('.question-text').value = question.text;
+      
+      // Set image if exists
+      if (question.image) {
+        const imagePreview = questionElement.querySelector('.image-preview');
+        const previewImg = imagePreview.querySelector('img');
+        const imagePath = questionElement.querySelector('.question-image-path');
+        
+        previewImg.src = question.image;
+        imagePath.value = question.image;
+        imagePreview.style.display = 'block';
+      }
+      
+      // Load options
+      const optionsContainer = questionElement.querySelector('.options-container');
+      optionsContainer.innerHTML = '';
+      
+      question.options.forEach((option, optionIndex) => {
+        const optionElement = document.createElement('div');
+        optionElement.className = 'option-item input-group mb-2';
+        optionElement.innerHTML = `
+          <div class="input-group-text">
+            <input type="radio" name="correct-${questionIndex}" class="option-correct" ${optionIndex === question.correctOptionIndex ? 'checked' : ''}>
+          </div>
+          <input type="text" class="form-control option-text" placeholder="Nhập đáp án" value="${option}" required>
+          <button type="button" class="btn btn-outline-danger remove-option">
+            <i class="bi bi-x"></i>
+          </button>
+        `;
+        optionsContainer.appendChild(optionElement);
+      });
+      
+      questionsContainer.appendChild(questionElement);
+    }
+    
+    function loadShortAnswerQuestion(question, index) {
+      const questionIndex = Date.now() + index;
+      
+      let html = shortAnswerTemplate.innerHTML
+        .replace(/{INDEX}/g, questionIndex)
+        .replace(/{NUMBER}/g, index + 1);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const questionElement = tempDiv.firstElementChild;
+      
+      questionElement.querySelector('.question-text').value = question.text;
+      questionElement.querySelector('.short-answer').value = question.shortAnswer || '';
+      
+      if (question.image) {
+        const imagePreview = questionElement.querySelector('.image-preview');
+        const previewImg = imagePreview.querySelector('img');
+        const imagePath = questionElement.querySelector('.question-image-path');
+        
+        previewImg.src = question.image;
+        imagePath.value = question.image;
+        imagePreview.style.display = 'block';
+      }
+      
+      questionsContainer.appendChild(questionElement);
+    }
+    
+    function loadMatchingQuestion(question, index) {
+      const questionIndex = Date.now() + index;
+      
+      let html = matchingTemplate.innerHTML
+        .replace(/{INDEX}/g, questionIndex)
+        .replace(/{NUMBER}/g, index + 1);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const questionElement = tempDiv.firstElementChild;
+      
+      questionElement.querySelector('.question-text').value = question.text;
+      
+      const pairsContainer = questionElement.querySelector('.matching-pairs-container');
+      pairsContainer.innerHTML = '';
+      
+      question.matchingPairs.forEach((pair, pairIndex) => {
+        const pairElement = document.createElement('div');
+        pairElement.className = 'card mb-3 matching-pair';
+        pairElement.setAttribute('data-pair-index', pairIndex);
+        
+        pairElement.innerHTML = `
+          <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <span>Cặp ${pairIndex + 1}</span>
+            <button type="button" class="btn btn-danger btn-sm remove-pair">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-5">
+                <label class="form-label">Bên trái</label>
+                <div class="input-group mb-3">
+                  <select class="form-select left-type">
+                    <option value="text" ${pair.leftType === 'text' ? 'selected' : ''}>Văn bản</option>
+                    <option value="image" ${pair.leftType === 'image' ? 'selected' : ''}>Hình ảnh</option>
+                  </select>
+                </div>
+                <div class="left-content" style="display: ${pair.leftType === 'text' ? 'block' : 'none'};">
+                  <input type="text" class="form-control left-text" placeholder="Nội dung bên trái" value="${pair.leftType === 'text' ? pair.left : ''}">
+                </div>
+                <div class="left-image-container mt-2" style="display: ${pair.leftType === 'image' ? 'block' : 'none'};">
+                  <div class="input-group">
+                    <input type="file" class="form-control left-image-upload" accept="image/*">
+                    <button type="button" class="btn btn-outline-primary left-upload-btn">Tải lên</button>
+                  </div>
+                  <div class="left-image-preview mt-2" style="display: ${pair.leftType === 'image' ? 'block' : 'none'};">
+                    <img src="${pair.leftType === 'image' ? pair.left : ''}" class="img-fluid img-thumbnail" style="max-height: 150px;">
+                    <input type="hidden" class="left-image-path" value="${pair.leftType === 'image' ? pair.left : ''}">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-2 d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                  <i class="bi bi-arrow-right fs-1"></i>
+                </div>
+              </div>
+              
+              <div class="col-md-5">
+                <label class="form-label">Bên phải</label>
+                <div class="input-group mb-3">
+                  <select class="form-select right-type">
+                    <option value="text" ${pair.rightType === 'text' ? 'selected' : ''}>Văn bản</option>
+                    <option value="image" ${pair.rightType === 'image' ? 'selected' : ''}>Hình ảnh</option>
+                  </select>
+                </div>
+                <div class="right-content" style="display: ${pair.rightType === 'text' ? 'block' : 'none'};">
+                  <input type="text" class="form-control right-text" placeholder="Nội dung bên phải" value="${pair.rightType === 'text' ? pair.right : ''}">
+                </div>
+                <div class="right-image-container mt-2" style="display: ${pair.rightType === 'image' ? 'block' : 'none'};">
+                  <div class="input-group">
+                    <input type="file" class="form-control right-image-upload" accept="image/*">
+                    <button type="button" class="btn btn-outline-primary right-upload-btn">Tải lên</button>
+                  </div>
+                  <div class="right-image-preview mt-2" style="display: ${pair.rightType === 'image' ? 'block' : 'none'};">
+                    <img src="${pair.rightType === 'image' ? pair.right : ''}" class="img-fluid img-thumbnail" style="max-height: 150px;">
+                    <input type="hidden" class="right-image-path" value="${pair.rightType === 'image' ? pair.right : ''}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        pairsContainer.appendChild(pairElement);
+      });
+      
+      questionsContainer.appendChild(questionElement);
+    }
+    
+    function addMultipleChoiceQuestion() {
+      questionCount++;
+      const questionIndex = Date.now();
+      
+      let html = multipleChoiceTemplate.innerHTML
+        .replace(/{INDEX}/g, questionIndex)
+        .replace(/{NUMBER}/g, questionCount);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const newQuestion = tempDiv.firstElementChild;
+      
+      questionsContainer.appendChild(newQuestion);
+      updateNoQuestionsMessage();
+      
+      const optionsContainer = newQuestion.querySelector('.options-container');
+      optionsContainer.innerHTML = '';
+      addOption(optionsContainer, questionIndex);
+      addOption(optionsContainer, questionIndex);
+    }
+    
+    function addShortAnswerQuestion() {
+      questionCount++;
+      const questionIndex = Date.now();
+      
+      let html = shortAnswerTemplate.innerHTML
+        .replace(/{INDEX}/g, questionIndex)
+        .replace(/{NUMBER}/g, questionCount);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const newQuestion = tempDiv.firstElementChild;
+      
+      questionsContainer.appendChild(newQuestion);
+      updateNoQuestionsMessage();
+    }
+    
+    function addMatchingQuestion() {
+      questionCount++;
+      const questionIndex = Date.now();
+      
+      let html = matchingTemplate.innerHTML
+        .replace(/{INDEX}/g, questionIndex)
+        .replace(/{NUMBER}/g, questionCount);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const newQuestion = tempDiv.firstElementChild;
+      
+      questionsContainer.appendChild(newQuestion);
+      updateNoQuestionsMessage();
+      
+      const pairsContainer = newQuestion.querySelector('.matching-pairs-container');
+      pairsContainer.innerHTML = '';
+      addMatchingPair(pairsContainer, 0);
+      addMatchingPair(pairsContainer, 1);
+    }
+    
+    function addOption(optionsContainer, questionIndex) {
+      const newOption = document.createElement('div');
+      newOption.className = 'option-item input-group mb-2';
+      newOption.innerHTML = `
+        <div class="input-group-text">
+          <input type="radio" name="correct-${questionIndex}" class="option-correct">
+        </div>
+        <input type="text" class="form-control option-text" placeholder="Nhập đáp án" required>
+        <button type="button" class="btn btn-outline-danger remove-option">
+          <i class="bi bi-x"></i>
+        </button>
+      `;
+      
+      optionsContainer.appendChild(newOption);
+    }
+    
+    function addMatchingPair(pairsContainer, pairIndex) {
+      const newPair = document.createElement('div');
+      newPair.className = 'card mb-3 matching-pair';
+      newPair.setAttribute('data-pair-index', pairIndex);
+      
+      newPair.innerHTML = `
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+          <span>Cặp ${pairIndex + 1}</span>
+          <button type="button" class="btn btn-danger btn-sm remove-pair">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-5">
+              <label class="form-label">Bên trái</label>
+              <div class="input-group mb-3">
+                <select class="form-select left-type">
+                  <option value="text">Văn bản</option>
+                  <option value="image">Hình ảnh</option>
+                </select>
+              </div>
+              <div class="left-content">
+                <input type="text" class="form-control left-text" placeholder="Nội dung bên trái">
+              </div>
+              <div class="left-image-container mt-2" style="display: none;">
+                <div class="input-group">
+                  <input type="file" class="form-control left-image-upload" accept="image/*">
+                  <button type="button" class="btn btn-outline-primary left-upload-btn">Tải lên</button>
+                </div>
+                <div class="left-image-preview mt-2" style="display: none;">
+                  <img src="" class="img-fluid img-thumbnail" style="max-height: 150px;">
+                  <input type="hidden" class="left-image-path">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-2 d-flex align-items-center justify-content-center">
+              <div class="text-center">
+                <i class="bi bi-arrow-right fs-1"></i>
+              </div>
+            </div>
+            
+            <div class="col-md-5">
+              <label class="form-label">Bên phải</label>
+              <div class="input-group mb-3">
+                <select class="form-select right-type">
+                  <option value="text">Văn bản</option>
+                  <option value="image">Hình ảnh</option>
+                </select>
+              </div>
+              <div class="right-content">
+                <input type="text" class="form-control right-text" placeholder="Nội dung bên phải">
+              </div>
+              <div class="right-image-container mt-2" style="display: none;">
+                <div class="input-group">
+                  <input type="file" class="form-control right-image-upload" accept="image/*">
+                  <button type="button" class="btn btn-outline-primary right-upload-btn">Tải lên</button>
+                </div>
+                <div class="right-image-preview mt-2" style="display: none;">
+                  <img src="" class="img-fluid img-thumbnail" style="max-height: 150px;">
+                  <input type="hidden" class="right-image-path">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      pairsContainer.appendChild(newPair);
+    }
+    
+    function updateQuestionNumbers() {
+      document.querySelectorAll('.question-item').forEach((item, index) => {
+        item.querySelector('.question-number').textContent = index + 1;
+      });
+      questionCount = document.querySelectorAll('.question-item').length;
+    }
+    
+    function updateNoQuestionsMessage() {
+      if (questionsContainer.children.length === 0) {
+        noQuestionsMessage.style.display = 'block';
+      } else {
+        noQuestionsMessage.style.display = 'none';
+      }
+    }
+  });
+</script>

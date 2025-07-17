@@ -1,0 +1,27 @@
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Trang dành cho học sinh</h4>
+      </div>
+      <div class="card-body">
+        <form action="/student/register" method="POST">
+          <div class="mb-3">
+            <label for="name" class="form-label">Họ và tên</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="className" class="form-label">Lớp</label>
+            <input type="text" class="form-control" id="className" name="className" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">Vào làm bài</button>
+          </div>
+        </form>
+        <div class="mt-3 text-center">
+          <p><a href="/">Quay lại trang chủ</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

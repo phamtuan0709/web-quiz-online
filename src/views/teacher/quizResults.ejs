@@ -1,0 +1,276 @@
+<div class="container mt-4">
+  <h1 class="text-center mb-4">
+    <i class="bi bi-bar-chart-fill text-primary"></i> 
+    Kết quả bài kiểm tra: <%= quiz.title %>
+  </h1>
+  
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Mô tả:</strong> <%= quiz.description || 'Không có mô tả' %>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="d-flex gap-2">
+        <a href="/teacher/dashboard" class="btn btn-secondary">
+          <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+        <div class="dropdown">
+          <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+            <i class="bi bi-download"></i> Xuất CSV
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+            <li><h6 class="dropdown-header">Xuất theo lớp</h6></li>
+            <li><a class="dropdown-item" href="/teacher/quiz/results/<%= quiz._id %>/export">
+              <i class="bi bi-file-earmark-excel"></i> Tất cả lớp
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <% allClasses.forEach(className => { %>
+              <li><a class="dropdown-item" href="/teacher/quiz/results/<%= quiz._id %>/export/<%= className %>">
+                <i class="bi bi-file-earmark-excel"></i> Lớp <%= className %>
+              </a></li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Thống kê tổng quan -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-gradient bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="bi bi-graph-up"></i> Thống kê tổng quan
+          </h4>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="card h-100 border-0 bg-light">
+                <div class="card-body text-center">
+                  <div class="text-primary mb-2">
+                    <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                  </div>
+                  <h5 class="card-title text-muted">Số học sinh</h5>
+                  <h2 class="text-primary"><%= stats.totalAttempts %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 border-0 bg-light">
+                <div class="card-body text-center">
+                  <div class="mb-2">
+                    <i class="bi bi-calculator" style="font-size: 2rem; color: <%= stats.averageScore >= 70 ? '#28a745' : (stats.averageScore >= 40 ? '#ffc107' : '#dc3545') %>;"></i>
+                  </div>
+                  <h5 class="card-title text-muted">Điểm trung bình</h5>
+                  <h2 class="<%= stats.averageScore >= 70 ? 'text-success' : (stats.averageScore >= 40 ? 'text-warning' : 'text-danger') %>">
+                    <%= stats.averageScore %>%
+                  </h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 border-0 bg-light">
+                <div class="card-body text-center">
+                  <div class="text-success mb-2">
+                    <i class="bi bi-trophy-fill" style="font-size: 2rem;"></i>
+                  </div>
+                  <h5 class="card-title text-muted">Điểm cao nhất</h5>
+                  <h2 class="text-success"><%= stats.highestScore %>%</h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 border-0 bg-light">
+                <div class="card-body text-center">
+                  <div class="text-danger mb-2">
+                    <i class="bi bi-arrow-down-circle-fill" style="font-size: 2rem;"></i>
+                  </div>
+                  <h5 class="card-title text-muted">Điểm thấp nhất</h5>
+                  <h2 class="<%= stats.lowestScore >= 70 ? 'text-success' : (stats.lowestScore >= 40 ? 'text-warning' : 'text-danger') %>">
+                    <%= stats.lowestScore %>%
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Danh sách học sinh -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-gradient bg-primary text-white">
+      <h4 class="mb-0">
+        <i class="bi bi-list-ul"></i> Danh sách học sinh đã làm bài
+      </h4>
+    </div>
+    <div class="card-body">
+      <% if (results && results.length > 0) { %>
+        <!-- Tìm kiếm -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm học sinh hoặc lớp...">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex justify-content-end">
+              <small class="text-muted align-self-center">
+                Tổng cộng: <strong><%= results.length %></strong> học sinh
+              </small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-hover" id="resultsTable">
+            <thead class="table-light">
+              <tr>
+                <th class="text-center" style="width: 60px;">STT</th>
+                <th><i class="bi bi-person"></i> Họ và tên</th>
+                <th class="text-center"><i class="bi bi-building"></i> Lớp</th>
+                <th class="text-center"><i class="bi bi-award"></i> Điểm số</th>
+                <th class="text-center" style="width: 200px;"><i class="bi bi-bar-chart"></i> Tỉ lệ</th>
+                <th class="text-center"><i class="bi bi-calendar"></i> Ngày làm bài</th>
+                <th class="text-center"><i class="bi bi-eye"></i> Chi tiết</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% results.forEach((result, index) => { %>
+                <tr>
+                  <td class="text-center"><%= index + 1 %></td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 14px;">
+                        <%= result.studentName.charAt(0).toUpperCase() %>
+                      </div>
+                      <strong><%= result.studentName %></strong>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary"><%= result.className %></span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary fs-6">
+                      <%= result.score %> / <%= result.totalQuestions %>
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress" style="height: 20px;">
+                      <div class="progress-bar <%= result.percentageScore >= 70 ? 'bg-success' : (result.percentageScore >= 40 ? 'bg-warning' : 'bg-danger') %>" 
+                           role="progressbar" 
+                           style="width: <%= result.percentageScore %>%" 
+                           aria-valuenow="<%= result.percentageScore %>" 
+                           aria-valuemin="0" 
+                           aria-valuemax="100">
+                        <strong><%= result.percentageScore %>%</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <small class="text-muted">
+                      <%= new Date(result.completedAt).toLocaleDateString('vi-VN') %><br>
+                      <%= new Date(result.completedAt).toLocaleTimeString('vi-VN') %>
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm view-details" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#detailModal"
+                            data-student="<%= result.studentName %>"
+                            data-student-id="<%= result.studentId %>"
+                            data-quiz-id="<%= quiz._id %>">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5">
+          <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+          <h4 class="text-muted mt-3">Chưa có học sinh nào làm bài kiểm tra này</h4>
+          <p class="text-muted">Hãy chia sẻ mã bài kiểm tra cho học sinh để họ có thể tham gia.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Modal xem chi tiết bài làm -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="detailModalLabel">
+          <i class="bi bi-file-text"></i> Chi tiết bài làm của <span id="studentName"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalContent">
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="mt-2 text-muted">Đang tải chi tiết bài làm...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle"></i> Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('extraStyles') %>
+<style>
+  .progress {
+    height: 25px;
+  }
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+  }
+</style>
+
+<%- contentFor('extraScripts') %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý tìm kiếm học sinh
+    const searchInput = document.getElementById('searchInput');
+    const resultsTable = document.getElementById('resultsTable');
+    
+    if (searchInput && resultsTable) {
+      searchInput.addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = resultsTable.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+          const name = row.cells[1].textContent.toLowerCase();
+          const className = row.cells[2].textContent.toLowerCase();
+          
+          if (name.includes(searchTerm) || className.includes(searchTerm)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+</script>
